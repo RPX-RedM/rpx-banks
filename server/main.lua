@@ -12,15 +12,15 @@ RegisterNetEvent("rpx-banking:Server:Transact", function(type, amount)
     end
     if type == 1 then
         if player.money.bank >= amount then
-            player.func.RemoveMoney('bank', amount)
-            player.func.AddMoney('cash', amount)
+            player.RemoveMoney('bank', amount)
+            player.AddMoney('cash', amount)
         else
             TriggerClientEvent("pNotify:SendNotification", src, {text = "Insufficient funds.", type = "error", timeout = 3000, layout = "centerRight"})
         end
     elseif type == 2 then
         if player.money.cash >= amount then
-            player.func.RemoveMoney('cash', amount)
-            player.func.AddMoney('bank', amount)
+            player.RemoveMoney('cash', amount)
+            player.AddMoney('bank', amount)
         else
             TriggerClientEvent("pNotify:SendNotification", src, {text = "Insufficient funds.", type = "error", timeout = 3000, layout = "centerRight"})
         end
