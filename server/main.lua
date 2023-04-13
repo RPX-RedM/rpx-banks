@@ -7,7 +7,7 @@ RegisterNetEvent("rpx-banking:Server:Transact", function(type, amount)
     local player = RPX.GetPlayer(src)
     amount = tonumber(amount)
     if amount <= 0 then
-        TriggerClientEvent("pNotify:SendNotification", src, {text = "Invalid amount.", type = "error", timeout = 3000, layout = "centerRight"})
+        lib.notify(src, {title = "Invalid amount.", type = "error"})
         return
     end
     if type == 1 then
@@ -15,14 +15,14 @@ RegisterNetEvent("rpx-banking:Server:Transact", function(type, amount)
             player.RemoveMoney('bank', amount)
             player.AddMoney('cash', amount)
         else
-            TriggerClientEvent("pNotify:SendNotification", src, {text = "Insufficient funds.", type = "error", timeout = 3000, layout = "centerRight"})
+            lib.notify(src, {title = "Insufficient funds.", type = "error"})
         end
     elseif type == 2 then
         if player.money.cash >= amount then
             player.RemoveMoney('cash', amount)
             player.AddMoney('bank', amount)
         else
-            TriggerClientEvent("pNotify:SendNotification", src, {text = "Insufficient funds.", type = "error", timeout = 3000, layout = "centerRight"})
+            lib.notify(src, {title = "Insufficient funds.", type = "error"})
         end
     end
 end)
