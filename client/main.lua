@@ -1,27 +1,29 @@
 local BankOpen = false
 local BankBlips = {}
 
---@function: OpenBank
---@description: This function opens the bank.
 local OpenBank = function()
-    SendNUIMessage({action = "OPEN_BANK", balance = LocalPlayer.state.bank})
+    DisplayRadar(false)
+    DisplayHud(false)
+    SendNUIMessage({action = "OPEN_BANK", balance = LocalPlayer.state.money.bank})
     SetNuiFocus(true, true)
     BankOpen = true
+    Citizen.InvokeNative(0xFA08722A5EA82DA7, 'RespawnLight')   	-- SET_TIMECYCLE_MODIFIER
+    for i=0, 10 do Citizen.InvokeNative(0xFDB74C9CC54C3F37, 0.1 + (i / 10)); Wait(10) end	-- SET_TIMECYCLE_MODIFIER_STRENGTHs
 end
 
---@function: CloseBank
---@description: This function closes the bank.
 local CloseBank = function()
     SendNUIMessage({action = "CLOSE_BANK"})
     SetNuiFocus(false, false)
     BankOpen = false
+    for i=1, 10 do Citizen.InvokeNative(0xFDB74C9CC54C3F37, 1.0 - (i / 10)); Wait(15) end	-- SET_TIMECYCLE_MODIFIER_STRENGTHs
+    Citizen.InvokeNative(0x0E3F4AF2D63491FB)
+    DisplayRadar(true)
+    DisplayHud(true)
 end
 
---@thread: MainThread
---@description: This is the main thread for the banking system.
 CreateThread(function()
     for id, bank in pairs(Config.Banks) do
-        local blip = N_0x554d9d53f696d002(1664425300, bank)
+        local blip = Citizen.InvokeNative(0x554D9D53F696D002, 1664425300, bank)
         SetBlipSprite(blip, GetHashKey('blip_proc_bank'), 52)
         SetBlipScale(blip, 0.2)
         BankBlips[id] = blip
@@ -36,8 +38,6 @@ CreateThread(function()
     end
 end)
 
---@event: onResourceStop
---@description: This event is called when the resource is stopped.
 AddEventHandler('onResourceStop', function(resource)
     if resource ~= GetCurrentResourceName() then
         return
@@ -58,28 +58,20 @@ AddEventHandler('onResourceStop', function(resource)
     end
 end)
 
---@NUICallback: CloseNUI
---@description: This callback is called by the NUI when a close command is received.
 RegisterNUICallback('CloseNUI', function()
     CloseBank()
 end)
 
---@NUICallback: Transact
---@description: This callback is called by the NUI when a transaction is made.
 RegisterNUICallback('Transact', function(data)
     TriggerServerEvent('rpx-banking:Server:Transact', data.type, data.amount)
 end)
 
---@StateBagChangeHandler: bank
---@description: This handler is called when the bank state bag is changed, so we can update it.
 AddStateBagChangeHandler("bank", nil, function(bagName, key, value) 
     if GetPlayerFromStateBagName(bagName) ~= PlayerId() then return end
     if not BankOpen then return end
     SendNUIMessage({action = "UPDATE_BALANCE", balance = value})
 end)
 
---@event: rpx-banks:client:OpenBanking
---@description: This event is called by the client when a player is trying to open the bank.
 AddEventHandler("rpx-banks:client:OpenBanking", function()
     local PlayerCoords = GetEntityCoords(PlayerPedId())
     for id, bank in pairs(Config.Banks) do
