@@ -35,3 +35,5 @@ files {
 }
 
 lua54 'yes'
+
+dependencies { 'rpx-core', 'ox_lib' }
