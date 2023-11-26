@@ -63,7 +63,10 @@ RegisterNUICallback('CloseNUI', function()
 end)
 
 RegisterNUICallback('Transact', function(data)
-    TriggerServerEvent('rpx-banking:Server:Transact', data.type, data.amount)
+    local trans, after = lib.callback.await('rpx-banking:transact', false, data)
+    if trans then
+        SendNUIMessage({action = "OPEN_BANK", balance = after})
+    end
 end)
 
 AddStateBagChangeHandler("bank", nil, function(bagName, key, value) 
